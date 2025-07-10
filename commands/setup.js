@@ -167,7 +167,8 @@ async function execute(message, args, { responsibilities, points, saveData, BOT_
         .setCustomId('reason')
         .setLabel('السبب')
         .setStyle(TextInputStyle.Paragraph)
-        .setRequired(true);
+        .setRequired(false)
+        .setPlaceholder('اكتب سبب الحاجة للمسؤول (اختياري)');
 
       const actionRow = new ActionRowBuilder().addComponents(reasonInput);
       modal.addComponents(actionRow);

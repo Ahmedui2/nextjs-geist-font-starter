@@ -56,13 +56,15 @@ async function execute(message, args, { responsibilities, saveData, BOT_OWNERS, 
           .setCustomId('responsibility_name')
           .setLabel('اسم المسؤولية')
           .setStyle(TextInputStyle.Short)
-          .setRequired(true);
+          .setRequired(false)
+          .setPlaceholder('أدخل اسم المسؤولية');
 
         const descInput = new TextInputBuilder()
           .setCustomId('responsibility_desc')
           .setLabel('شرح المسؤولية (أرسل "لا" لعدم الشرح)')
           .setStyle(TextInputStyle.Paragraph)
-          .setRequired(false);
+          .setRequired(false)
+          .setPlaceholder('أدخل شرح المسؤولية أو اتركه فارغ');
 
         const firstActionRow = new ActionRowBuilder().addComponents(nameInput);
         const secondActionRow = new ActionRowBuilder().addComponents(descInput);
@@ -186,6 +188,7 @@ async function execute(message, args, { responsibilities, saveData, BOT_OWNERS, 
           .setLabel('شرح المسؤولية (أرسل "لا" لعدم الشرح)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
+          .setPlaceholder('أدخل شرح المسؤولية أو اتركه فارغ')
           .setValue(responsibilities[responsibilityName].description || '');
 
         const actionRow = new ActionRowBuilder().addComponents(descInput);
@@ -203,6 +206,7 @@ async function execute(message, args, { responsibilities, saveData, BOT_OWNERS, 
           .setLabel('أدخل معرفات المسؤولين (افصل بفواصل)')
           .setStyle(TextInputStyle.Paragraph)
           .setRequired(false)
+          .setPlaceholder('أدخل معرفات المسؤولين مفصولة بفواصل')
           .setValue(responsibilities[responsibilityName].responsibles ? responsibilities[responsibilityName].responsibles.join(', ') : '');
 
         const actionRow = new ActionRowBuilder().addComponents(respInput);
@@ -221,12 +225,16 @@ async function execute(message, args, { responsibilities, saveData, BOT_OWNERS, 
       const name = interaction.fields.getTextInputValue('responsibility_name').trim();
       const desc = interaction.fields.getTextInputValue('responsibility_desc').trim();
 
+      if (!name) {
+        return interaction.reply({ content: '**يجب إدخال اسم المسؤولية!**', flags: 64 });
+      }
+
       if (responsibilities[name]) {
         return interaction.reply({ content: '**هذه المسؤولية موجودة بالفعل!**', flags: 64 });
       }
 
       responsibilities[name] = {
-        description: desc.toLowerCase() === 'لا' ? '' : desc,
+        description: (!desc || desc.toLowerCase() === 'لا') ? '' : desc,
         responsibles: []
       };
       saveData();
@@ -288,7 +296,7 @@ async function execute(message, args, { responsibilities, saveData, BOT_OWNERS, 
         return interaction.reply({ content: '**المسؤولية غير موجودة!**', flags: 64 });
       }
 
-      responsibilities[responsibilityName].description = desc.toLowerCase() === 'لا' ? '' : desc;
+      responsibilities[responsibilityName].description = (!desc || desc.toLowerCase() === 'لا') ? '' : desc;
       saveData();
       await interaction.reply({ content: `**تم تعديل شرح المسؤولية: ${responsibilityName}**`, flags: 64 });
     } else if (interaction.customId.startsWith('manage_responsibles_modal_')) {

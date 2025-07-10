@@ -233,6 +233,32 @@ client.on('interactionCreate', async interaction => {
         return interaction.reply({ content: '**لا يوجد مسؤولين معينين لهذه المسؤولية.**', flags: 64 });
       }
 
+      // Check cooldown
+      if (!client.responsibilityCooldown) {
+        client.responsibilityCooldown = { time: 0, users: {} };
+      }
+      const cooldownTime = client.responsibilityCooldown?.time || 0;
+      if (cooldownTime > 0) {
+        const userId = interaction.user.id;
+        const now = Date.now();
+        if (client.responsibilityCooldown.users[userId]) {
+          const timeLeft = client.responsibilityCooldown.users[userId] + cooldownTime - now;
+          if (timeLeft > 0) {
+            const secondsLeft = Math.ceil(timeLeft / 1000);
+            return interaction.reply({ 
+              content: `**يجب الانتظار ${secondsLeft} ثانية قبل إرسال طلب آخر.**`, 
+              flags: 64 
+            });
+          }
+        }
+      }
+
+      // Set cooldown for user
+      if (cooldownTime > 0) {
+        if (!client.responsibilityCooldown.users) client.responsibilityCooldown.users = {};
+        client.responsibilityCooldown.users[interaction.user.id] = Date.now();
+      }
+
       const embed = new EmbedBuilder()
         .setTitle(`**طلب مساعدة في المسؤولية: ${responsibilityName}**`)
         .setDescription(`**السبب:** ${reason}\n**من:** ${interaction.user}`)

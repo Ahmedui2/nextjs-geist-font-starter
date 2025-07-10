@@ -114,6 +114,26 @@ async function execute(message, args, { responsibilities, points, saveData, ADMI
 
   buttonCollector.on('collect', async interaction => {
     try {
+      // Check cooldown
+      if (!client.responsibilityCooldown) {
+        client.responsibilityCooldown = { time: 0, users: {} };
+      }
+
+      const cooldownTime = client.responsibilityCooldown.time || 0;
+      const userId = interaction.user.id;
+      const now = Date.now();
+
+      if (cooldownTime > 0 && client.responsibilityCooldown.users[userId]) {
+        const timeLeft = client.responsibilityCooldown.users[userId] + cooldownTime - now;
+        if (timeLeft > 0) {
+          const secondsLeft = Math.ceil(timeLeft / 1000);
+          return interaction.reply({ 
+            content: `**يجب الانتظار ${secondsLeft} ثانية قبل إرسال طلب آخر.**`, 
+            flags: 64 
+          });
+        }
+      }
+
       const parts = interaction.customId.split('_');
       const responsibilityName = parts[2];
       const target = parts[3]; // userId or 'all'
@@ -127,7 +147,8 @@ async function execute(message, args, { responsibilities, points, saveData, ADMI
         .setCustomId('reason')
         .setLabel('السبب')
         .setStyle(TextInputStyle.Paragraph)
-        .setRequired(true);
+        .setRequired(false)
+        .setPlaceholder('اكتب سبب الحاجة للمسؤول (اختياري)');
 
       const actionRow = new ActionRowBuilder().addComponents(reasonInput);
       modal.addComponents(actionRow);
