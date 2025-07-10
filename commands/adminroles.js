@@ -45,9 +45,9 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
     try {
       if (interaction.customId === 'adminroles_add') {
         // Send message asking for roles
-        await interaction.reply({ 
-          content: '**أرسل معرفات الرولات أو المنشن (مفصولة بمسافات):**\nمثال: `123456789 987654321` أو `@role1 @role2`', 
-          flags: 64 
+        await interaction.deferReply({ ephemeral: true });
+        await interaction.followUp({ 
+          content: '**أرسل معرفات الرولات أو المنشن (مفصولة بمسافات):**\nمثال: `123456789 987654321` أو `@role1 @role2`'
         });
 
         // Create message collector
@@ -66,7 +66,7 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
             const roleIds = rolesInput.split(/\s+/).map(role => role.replace(/[<@&>]/g, '')).filter(id => id);
 
             if (roleIds.length === 0) {
-              return interaction.followUp({ content: '**لم يتم تحديد أي رولات صحيحة.**', flags: 64 });
+              return interaction.followUp({ content: '**لم يتم تحديد أي رولات صحيحة.**' });
             }
 
             let addedRoles = [];
@@ -104,7 +104,7 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
               response += `**رولات غير صحيحة:**\n${invalidRoles.join(', ')}\n\n`;
             }
 
-            await interaction.followUp({ content: response || '**لم يتم إجراء أي تغييرات.**', flags: 64 });
+            await interaction.followUp({ content: response || '**لم يتم إجراء أي تغييرات.**' });
 
             // Update main menu
             const newEmbed = new EmbedBuilder()
@@ -116,25 +116,25 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
             await sentMessage.edit({ embeds: [newEmbed], components: [row] });
           } catch (error) {
             console.error('Error processing roles:', error);
-            await interaction.followUp({ content: '**حدث خطأ أثناء معالجة الرولات.**', flags: 64 });
+            await interaction.followUp({ content: '**حدث خطأ أثناء معالجة الرولات.**' });
           }
         });
 
         messageCollector.on('end', (collected) => {
           if (collected.size === 0) {
-            interaction.followUp({ content: '**انتهت مهلة الانتظار.**', flags: 64 }).catch(() => {});
+            interaction.followUp({ content: '**انتهت مهلة الانتظار.**' }).catch(() => {});
           }
         });
 
       } else if (interaction.customId === 'adminroles_remove') {
         if (ADMIN_ROLES.length === 0) {
-          return interaction.reply({ content: '**لا توجد رولات لإزالتها.**', flags: 64 });
+          return interaction.reply({ content: '**لا توجد رولات لإزالتها.**', ephemeral: true });
         }
 
         // Send message asking for roles
-        await interaction.reply({ 
-          content: '**أرسل معرفات الرولات أو المنشن (مفصولة بمسافات):**\nمثال: `123456789 987654321` أو `@role1 @role2`', 
-          flags: 64 
+        await interaction.deferReply({ ephemeral: true });
+        await interaction.followUp({ 
+          content: '**أرسل معرفات الرولات أو المنشن (مفصولة بمسافات):**\nمثال: `123456789 987654321` أو `@role1 @role2`'
         });
 
         // Create message collector
@@ -153,7 +153,7 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
             const roleIds = rolesInput.split(/\s+/).map(role => role.replace(/[<@&>]/g, '')).filter(id => id);
 
             if (roleIds.length === 0) {
-              return interaction.followUp({ content: '**لم يتم تحديد أي رولات صحيحة.**', flags: 64 });
+              return interaction.followUp({ content: '**لم يتم تحديد أي رولات صحيحة.**' });
             }
 
             let removedRoles = [];
@@ -179,7 +179,7 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
               response += `**رولات غير موجودة في القائمة:**\n${notFoundRoles.map(id => `<@&${id}>`).join('\n')}\n\n`;
             }
 
-            await interaction.followUp({ content: response || '**لم يتم إجراء أي تغييرات.**', flags: 64 });
+            await interaction.followUp({ content: response || '**لم يتم إجراء أي تغييرات.**' });
 
             // Update main menu
             const newEmbed = new EmbedBuilder()
@@ -191,19 +191,19 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
             await sentMessage.edit({ embeds: [newEmbed], components: [row] });
           } catch (error) {
             console.error('Error processing roles:', error);
-            await interaction.followUp({ content: '**حدث خطأ أثناء معالجة الرولات.**', flags: 64 });
+            await interaction.followUp({ content: '**حدث خطأ أثناء معالجة الرولات.**' });
           }
         });
 
         messageCollector.on('end', (collected) => {
           if (collected.size === 0) {
-            interaction.followUp({ content: '**انتهت مهلة الانتظار.**', flags: 64 }).catch(() => {});
+            interaction.followUp({ content: '**انتهت مهلة الانتظار.**' }).catch(() => {});
           }
         });
 
       } else if (interaction.customId === 'adminroles_list') {
         if (ADMIN_ROLES.length === 0) {
-          return interaction.reply({ content: '**لا توجد رولات محددة حالياً**', flags: 64 });
+          return interaction.reply({ content: '**لا توجد رولات محددة حالياً**', ephemeral: true });
         }
 
         // Create select menu with roles
@@ -254,7 +254,7 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
         try {
           const role = await message.guild.roles.fetch(selectedRoleId);
           if (!role) {
-            return interaction.reply({ content: '**هذا الرول غير موجود.**', flags: 64 });
+            return interaction.reply({ content: '**هذا الرول غير موجود.**', ephemeral: true });
           }
 
           const members = role.members.map(member => member.displayName || member.user.username);
@@ -283,7 +283,7 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
 
           await interaction.update({ embeds: [memberEmbed], components: [buttonRow] });
         } catch (error) {
-          await interaction.reply({ content: '**حدث خطأ أثناء جلب معلومات الرول.**', flags: 64 });
+          await interaction.reply({ content: '**حدث خطأ أثناء جلب معلومات الرول.**', ephemeral: true });
         }
 
       } else if (interaction.customId === 'adminroles_back') {
@@ -299,8 +299,10 @@ async function execute(message, args, { ADMIN_ROLES, saveData, BOT_OWNERS, clien
     } catch (error) {
       console.error('Error in adminroles collector:', error);
       try {
-        if (!interaction.replied && !interaction.deferred) {
-          await interaction.reply({ content: '**حدث خطأ أثناء معالجة الطلب.**', flags: 64 });
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp({ content: '**حدث خطأ أثناء معالجة الطلب.**' });
+        } else {
+          await interaction.reply({ content: '**حدث خطأ أثناء معالجة الطلب.**', ephemeral: true });
         }
       } catch (replyError) {
         console.error('Failed to send error reply:', replyError);
